@@ -4,7 +4,7 @@ import axios from "axios";
 import { actions } from "../context/AuthContext.jsx";
 import { useNavigate } from "react-router-dom";
 
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = import.meta.env.VITE_API_URL; // should be http://54.159.4.186:5000
 
 export const useLogin = () => {
   const [error, setError] = useState(null);
@@ -14,40 +14,29 @@ export const useLogin = () => {
   const navigate = useNavigate();
 
   const login = async (email, password) => {
-    // reset loading and error to initial state whenever login hook is called
     setIsLoading(true);
     setError(null);
 
     try {
-      const response = await axios.post(
+      const res = await axios.post(
         `${API_URL}/api/auth/login`,
-        {
-          email,
-          password,
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-          withCredentials: true, // include cookies with request
-        }
+        { email, password },
+        { withCredentials: true } // ✅ important for cookies
       );
 
-      const user = response.data?.user;
-      //   console.log("useLogin.js : ", response);
-      console.log(user);
+      // dispatch login action
+      dispatch({ type: actions.LOGIN, payload: res.data });
 
-      // storing user data from server in authContext
-      dispatch({ type: actions.LOGIN, payload: user });
-      // redirect to home page after successful login
+      // redirect to dashboard
       navigate("/dashboard");
+
+      setIsLoading(false);
     } catch (err) {
-      console.log(err);
-      setError(err.response.data.message);
-    } finally {
-      setIsLoading(false); // set loading to false after login process is complete
+      setError(err.response?.data?.message || "Login failed");
+      setIsLoading(false);
     }
   };
 
-  return { login, isLoading, error };
+  return { login, error, isLoading };
 };
+
