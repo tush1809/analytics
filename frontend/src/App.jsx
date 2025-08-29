@@ -13,7 +13,7 @@ function App() {
     <>
       <AuthContextProvider>
         <Routes>
-          <Route path="/" element={<Navigate to="/dashboard" />} />
+          <Route path="/" element={<Navigate to="/login" />} />
           <Route path="/dashboard" element={<Home />} />
           <Route path="/datahub" element={<DataHub />} />
           <Route path="/login" element={<Login />} />

@@ -1,30 +1,39 @@
-# --- 1. Base image ---
+# --- 1. Builder Stage ---
+FROM python:3.12 AS builder
+
+WORKDIR /app
+
+# Copy only the requirements file and install dependencies to leverage Docker's cache
+COPY requirements.txt .
+RUN pip wheel --no-cache-dir --no-deps --wheel-dir=/usr/src/app/wheels -r requirements.txt
+
+# --- 2. Production Stage ---
 FROM python:3.12-slim
 
-# --- 2. Set environment variables ---
+# Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-# --- 3. Set work directory ---
 WORKDIR /app
 
-# --- 4. Install system dependencies ---
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
-    curl \
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends curl \
     && rm -rf /var/lib/apt/lists/*
 
-# --- 5. Copy requirements and install ---
-COPY requirements.txt .
-RUN pip install --upgrade pip
-RUN pip install --no-cache-dir -r requirements.txt
+# Copy wheels from the builder stage
+COPY --from=builder /usr/src/app/wheels /wheels
+RUN pip install --no-cache-dir --no-index --find-links=/wheels /wheels/* \
+    && rm -rf /wheels
 
-# --- 6. Copy project files ---
+# Copy the rest of the application code
 COPY . .
 
-# --- 7. Expose port ---
-EXPOSE 5001
+# Create a dedicated non-root user
+RUN groupadd -r appuser && useradd -r -g appuser appuser
+USER appuser
 
-# --- 8. Start the app with Gunicorn ---
-CMD ["gunicorn", "--bind", "0.0.0.0:5001", "--workers", "3", "app:app"]
+# Expose the application port
+EXPOSE 8000
 
+# Define the command to run the application
+CMD ["python", "app.py"]
