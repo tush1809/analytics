@@ -11,20 +11,16 @@ export const actions = {
   LOGOUT: "LOGOUT",
 };
 
+
 export const authReducer = (state, action) => {
   switch (action.type) {
     case actions.LOGIN:
-      return {
-        user: {
-          firstname: action.payload.firstname,
-          lastname: action.payload.lastname,
-          email: action.payload.email,
-        },
-      };
-
+      return { user: action.payload }; // This is okay
     case actions.LOGOUT:
-      return { user: null };
-
+      return { user: null }; // This is okay
+    case "INITIALIZE_AUTH":
+      // The error is likely here!
+      return { user: action.payload, firstname: action.payload.firstname };
     default:
       return state;
   }

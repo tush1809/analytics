@@ -1,47 +1,37 @@
 import { useState } from "react";
-import { useAuthContext } from "./useAuthContext.js";
-import axios from "axios";
-import { actions } from "../context/AuthContext.jsx";
 import { useNavigate } from "react-router-dom";
 
-const API_URL = import.meta.env.VITE_API_URL;
+// Import your new, configured 'authApi' instance
+import { authApi } from '../api/axios';
 
 export const useSignup = () => {
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(null);
-
   const navigate = useNavigate();
 
   const signup = async (formData) => {
-    // reset loading and error to initial state whenever signup hook is called
     setIsLoading(true);
     setError(null);
 
-    console.log("registering...");
-
     try {
-      const response = await axios.post(
-        `${API_URL}/api/auth/register`,
-        formData,
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-          withCredentials: true, // include cookies with request
-        }
-      );
+      // Use 'authApi' and the relative path. 
+      // The base URL and credentials config are already included.
+      const response = await authApi.post('/api/auth/register', formData);
 
-      console.log("User registered!");
-
-      // redirect to login page after successful signup
+      console.log("User registered successfully!", response.data);
+      
+      // Redirect to the login page after successful signup
       navigate("/login");
+
     } catch (err) {
-      console.log(err);
-      setError(err.response.data.message);
+      // Set a specific error message from the backend if available
+      setError(err.response?.data?.message || "An unknown error occurred during signup.");
     } finally {
-      setIsLoading(false); // set loading to false after login process is complete
+      // This ensures isLoading is always set to false when the process ends
+      setIsLoading(false); 
     }
   };
 
   return { signup, isLoading, error };
 };
+

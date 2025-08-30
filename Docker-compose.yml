@@ -1,0 +1,77 @@
+version: "3.9"
+
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+      - data-upload-service
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/ || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  backend:
+    build:
+      context: ./analytics-service
+      dockerfile: Dockerfile
+    container_name: backend
+    env_file:
+      - ./analytics-service/.env
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  data-upload-service:
+    build:
+      context: ./data-upload-service
+      dockerfile: Dockerfile
+    container_name: data-upload-service
+    env_file:
+      - ./data-upload-service/.env
+    ports:
+      - "5000:5000"
+    volumes:
+      - data_uploads:/usr/src/app/uploads   # persist uploaded files
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  user-auth-service:
+    build:
+      context: ./user-auth-service/backend
+      dockerfile: Dockerfile
+    container_name: user-auth-service
+    env_file:
+      - ./user-auth-service/.env
+    ports:
+      - "5001:5000"   # maps container port 5000 to host 5001
+    volumes:
+      - user_auth_uploads:/usr/src/app/uploads
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+# Named volumes for persistent storage
+volumes:
+  data_uploads:
+  user_auth_uploads:
+
