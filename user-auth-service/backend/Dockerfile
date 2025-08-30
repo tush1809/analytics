@@ -14,7 +14,7 @@ RUN npm ci --omit=dev
 COPY . .
 
 # -----------------------------
-# Stage 2: Development
+# Stage 2: Production
 # -----------------------------
 FROM node:18-alpine
 
@@ -37,7 +37,7 @@ USER appuser
 EXPOSE 5000
 
 # Set environment variables
-ENV NODE_ENV=development
+ENV NODE_ENV=production
 
 # Start the application
 CMD ["node", "src/index.js"]
