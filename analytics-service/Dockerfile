@@ -5,7 +5,7 @@ WORKDIR /app
 
 # Copy only the requirements file and install dependencies to leverage Docker's cache
 COPY requirements.txt .
-RUN pip wheel --no-cache-dir --no-deps --wheel-dir=/usr/src/app/wheels -r requirements.txt
+RUN pip wheel --no-cache-dir --wheel-dir=/usr/src/app/wheels -r requirements.txt
 
 # --- 2. Production Stage ---
 FROM python:3.12-slim
@@ -36,4 +36,5 @@ USER appuser
 EXPOSE 8000
 
 # Define the command to run the application
-CMD ["python", "app.py"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "app:app"]
+
