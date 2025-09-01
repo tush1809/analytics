@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: data-upload-deployment
+  labels:
+    app: data-upload-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: data-upload-service
+  template:
+    metadata:
+      labels:
+        app: data-upload-service
+    spec:
+      containers:
+      - name: data-upload
+        image: tush1809/data-upload:latest
+        ports:
+        - containerPort: 5002
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: data-upload-service
+spec:
+  selector:
+    app: data-upload-service
+  ports:
+    - protocol: TCP
+      port: 5002
+      targetPort: 5002
+  type: ClusterIP
+
