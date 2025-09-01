@@ -194,13 +194,3 @@ Please ensure:
 * You update documentation if necessary
 
 ---
-
-## 📬 Contact
-
-For questions, feedback, or collaboration, feel free to reach out:
-
-* **Email:** [tusharsrivastava2003@gmail.com](mailto:tusharsrivastava2003@gmail.com)
-* **GitHub:** [tusharsrivastav](https://github.com/tusharsrivastav)
-* **LinkedIn:** [Tushar Srivastava](https://www.linkedin.com/in/tushar-srivastava-739009223/)
-
----
