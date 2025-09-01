@@ -1,41 +1,35 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: frontend-deployment
+  name: data-upload-deployment
   labels:
-    app: frontend
+    app: data-upload-service
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: frontend
+      app: data-upload-service
   template:
     metadata:
       labels:
-        app: frontend
+        app: data-upload-service
     spec:
       containers:
-      - name: frontend
-        image: tush1809/frontend:latest
+      - name: data-upload
+        image: tush1809/data-upload:latest
         ports:
-        - containerPort: 80
-        env:
-        - name: VITE_API_URL
-          value: "http://user-auth-service:5000"
-        - name: DATA_UPLOAD_URL
-          value: "http://data-upload-service:5002"
-        # --- MAKE SURE THIS BLOCK IS CORRECT ---
+        - containerPort: 5002
         resources:
           requests:
-            cpu: "100m"
-            memory: "128Mi"
+            cpu: "50m"
+            memory: "64Mi"
           limits:
-            cpu: "500m"
-            memory: "256Mi"
+            cpu: "200m"
+            memory: "128Mi"
         livenessProbe:
           httpGet:
             path: /
-            port: 80
+            port: 5002
           initialDelaySeconds: 15
           periodSeconds: 20
           timeoutSeconds: 5
@@ -43,10 +37,22 @@ spec:
         readinessProbe:
           httpGet:
             path: /
-            port: 80
+            port: 5002
           initialDelaySeconds: 5
           periodSeconds: 10
           timeoutSeconds: 3
           failureThreshold: 3
-        # --- END OF BLOCK ---
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: data-upload-service
+spec:
+  selector:
+    app: data-upload-service
+  ports:
+    - protocol: TCP
+      port: 5002
+      targetPort: 5002
+  type: ClusterIP
 

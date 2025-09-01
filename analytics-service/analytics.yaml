@@ -18,7 +18,26 @@ spec:
       - name: analytics
         image: tush1809/analytics:latest
         ports:
-        - containerPort: 8000   # match actual port inside container
+        - containerPort: 8000
+        # Liveness probe: checks if container is alive, restarts if failing
+        livenessProbe:
+          httpGet:
+            path: /health        # replace with your health endpoint
+            port: 8000
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 2
+          failureThreshold: 3
+        # Readiness probe: ensures container only receives traffic when healthy
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 2
+          failureThreshold: 3
+
 ---
 apiVersion: v1
 kind: Service
@@ -26,10 +45,10 @@ metadata:
   name: analytics-service
 spec:
   selector:
-    app: analytics-service   # fixed selector
+    app: analytics-service
   ports:
     - protocol: TCP
-      port: 5002              # cluster port
-      targetPort: 8000        # maps to containerPort
+      port: 5002
+      targetPort: 8000
   type: ClusterIP
 
