@@ -22,13 +22,16 @@ FROM node:18-alpine
 WORKDIR /usr/src/app
 
 # Create non-root user
-RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+COPY package*.json ./
+RUN npm install --production
 
 # Copy build artifacts
-COPY --from=build /usr/src/app ./
+COPY . .
 
 #non root user
-RUN mkdir -p /usr/src/app/uploads && chown -R appuser:appgroup /usr/src/app
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+
+RUN mkdir -p /usr/src/app/uploads && chown -R appuser:appgroup /usr/src/app/uploads
 
 # Switch to non-root user
 USER appuser

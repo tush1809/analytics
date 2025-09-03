@@ -67,6 +67,10 @@ app.get("/", (req, res) => {
   res.json({ message: "Data-Upload service is running!" });
 });
 
+app.get("/health", (req, res) => {
+  res.status(200).send("OK");
+});
+
 // --- SERVER ---
 const PORT = process.env.PORT || 5002;
 app.listen(PORT, () => {

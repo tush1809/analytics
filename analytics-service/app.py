@@ -120,3 +120,7 @@ def analyze_data():
 def home():
     return "Analytics"
 
+@app.route("/health", methods=["GET"])
+def health():
+    return {"status": "ok"}, 200
+

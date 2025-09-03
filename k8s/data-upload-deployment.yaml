@@ -2,10 +2,11 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: data-upload-deployment
+  namespace: analytics
   labels:
     app: data-upload-service
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: data-upload-service
@@ -14,11 +15,21 @@ spec:
       labels:
         app: data-upload-service
     spec:
+      imagePullSecrets:
+        - name: regcred
       containers:
       - name: data-upload
         image: tush1809/data-upload:latest
+        imagePullPolicy: Always
         ports:
-        - containerPort: 5002
+          - containerPort: 5002
+        resources:
+          requests:
+            cpu: "10m"
+            memory: "50Mi"
+          limits:
+            cpu: "200m"
+            memory: "512Mi"
         livenessProbe:
           httpGet:
             path: /health
@@ -40,6 +51,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: data-upload-service
+  namespace: analytics
 spec:
   selector:
     app: data-upload-service

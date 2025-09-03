@@ -5,7 +5,7 @@ metadata:
   labels:
     app: frontend
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: frontend
@@ -14,6 +14,8 @@ spec:
       labels:
         app: frontend
     spec:
+      imagePullSecrets:
+        - name: regcred  # <-- Adding for authenticated image pulls from my kubernetes secrets
       containers:
       - name: frontend
         image: tush1809/frontend:latest
@@ -21,13 +23,12 @@ spec:
         - containerPort: 80
         env:
         - name: VITE_API_URL
-          value: "http://user-auth-service:5000"
+          value: /auth
         - name: DATA_UPLOAD_URL
-          value: "http://data-upload-service:5002"
-        # --- MAKE SURE THIS BLOCK IS CORRECT ---
+          value: /upload
         resources:
           requests:
-            cpu: "100m"
+            cpu: "50m"
             memory: "128Mi"
           limits:
             cpu: "500m"
@@ -48,5 +49,17 @@ spec:
           periodSeconds: 10
           timeoutSeconds: 3
           failureThreshold: 3
-        # --- END OF BLOCK ---
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-service
+spec:
+  selector:
+    app: frontend
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  type: ClusterIP
 
