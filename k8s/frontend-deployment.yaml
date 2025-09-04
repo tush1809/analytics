@@ -1,35 +1,42 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: data-upload-deployment
+  name: frontend-deployment
   labels:
-    app: data-upload-service
+    app: frontend
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
-      app: data-upload-service
+      app: frontend
   template:
     metadata:
       labels:
-        app: data-upload-service
+        app: frontend
     spec:
+      imagePullSecrets:
+        - name: regcred  # <-- Adding for authenticated image pulls from my kubernetes secrets
       containers:
-      - name: data-upload
-        image: tush1809/data-upload:latest
+      - name: frontend
+        image: tush1809/frontend:latest
         ports:
-        - containerPort: 5002
+        - containerPort: 80
+        env:
+        - name: VITE_API_URL
+          value: /auth
+        - name: DATA_UPLOAD_URL
+          value: /upload
         resources:
           requests:
             cpu: "50m"
-            memory: "64Mi"
-          limits:
-            cpu: "200m"
             memory: "128Mi"
+          limits:
+            cpu: "500m"
+            memory: "256Mi"
         livenessProbe:
           httpGet:
             path: /
-            port: 5002
+            port: 80
           initialDelaySeconds: 15
           periodSeconds: 20
           timeoutSeconds: 5
@@ -37,7 +44,7 @@ spec:
         readinessProbe:
           httpGet:
             path: /
-            port: 5002
+            port: 80
           initialDelaySeconds: 5
           periodSeconds: 10
           timeoutSeconds: 3
@@ -46,13 +53,13 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: data-upload-service
+  name: frontend-service
 spec:
   selector:
-    app: data-upload-service
+    app: frontend
   ports:
     - protocol: TCP
-      port: 5002
-      targetPort: 5002
+      port: 80
+      targetPort: 80
   type: ClusterIP
 

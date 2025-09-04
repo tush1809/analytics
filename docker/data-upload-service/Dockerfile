@@ -3,14 +3,15 @@
 # -----------------------------
 FROM node:18-alpine AS build
 
-# Set working directory
 WORKDIR /usr/src/app
 
-
+# Copy package files first for better layer caching
 COPY package*.json ./
 
+# Install production dependencies only (faster & smaller)
 RUN npm ci --omit=dev
 
+# Copy source code (respects .dockerignore)
 COPY . .
 
 # -----------------------------
@@ -18,25 +19,21 @@ COPY . .
 # -----------------------------
 FROM node:18-alpine
 
-# Set working directory
 WORKDIR /usr/src/app
 
-# Create non-root user
-COPY package*.json ./
-RUN npm install --production
-
-# Copy build artifacts
-COPY . .
-
-#non root user
+# Create a non-root user for security
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 
-RUN mkdir -p /usr/src/app/uploads && chown -R appuser:appgroup /usr/src/app/uploads
+# Copy app from the build stage
+COPY --from=build /usr/src/app ./
+
+# Create uploads folder and set proper permissions
+RUN mkdir -p /usr/src/app/uploads && chown -R appuser:appgroup /usr/src/app
 
 # Switch to non-root user
 USER appuser
 
-# Expose app port
+# Expose application port
 EXPOSE 5000
 
 # Set environment variables
