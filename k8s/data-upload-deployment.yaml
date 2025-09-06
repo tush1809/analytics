@@ -25,7 +25,10 @@ spec:
           - containerPort: 5002
         envFrom:
           - secretRef:
-              name: data-upload-secret   # <-- ensure this matches the secret you created
+              name: data-upload-secret   # <-- your existing secret
+        env:
+          - name: FLASK_URL
+            value: "http://analytics-service:8000"   # <-- added to call analytics service
         resources:
           requests:
             cpu: "10m"
