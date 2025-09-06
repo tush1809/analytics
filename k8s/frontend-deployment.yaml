@@ -21,11 +21,9 @@ spec:
         image: tush1809/frontend:latest
         ports:
         - containerPort: 80
-        env:
-        - name: VITE_API_URL
-          value: /auth
-        - name: DATA_UPLOAD_URL
-          value: /upload
+        envFrom:
+        - secretRef:
+           name: frontend-secret
         resources:
           requests:
             cpu: "50m"

@@ -20,7 +20,10 @@ spec:
           image: tush1809/user-auth:latest
           ports:
             - containerPort: 5000
-          resources:
+          envFrom:
+            - secretRef:
+                name: user-auth-secret
+           resources:
             requests:
               cpu: 100m
               memory: 128Mi
